@@ -53,10 +53,14 @@ class _RoigelAppHomePageState extends State<RoigelAppHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        elevation: 0,
         toolbarHeight: 80,
         backgroundColor: appBarBackgroudColor,
         shadowColor: appBarShadowColor,
+        foregroundColor: appBarShadowColor,
+        surfaceTintColor: appBarShadowColor,
         title: const RoigelAppBar(),
       ),
       body: context.watch<RoigelAppPage>().page,

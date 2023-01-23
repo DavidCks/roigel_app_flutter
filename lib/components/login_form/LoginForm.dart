@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase/supabase.dart';
+import 'package:roigel_app_flutter/global_utils/init_supabase.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:roigel_app_flutter/components/login_form/utils/login.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,34 +15,57 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   String? _email;
   String? _password;
-  bool _is_logged_in =
-      Supabase.instance.client.auth.currentUser == null ? false : true;
+  bool _is_logged_in = false;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      init_supabase_auth().then((_) => {
+            if (Supabase.instance.client.auth.currentUser != null)
+              {
+                setState(() {
+                  _is_logged_in = true;
+                })
+              }
+            else
+              {
+                setState(() {
+                  _is_logged_in = false;
+                })
+              }
+          });
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       key: _formKey,
       child: Column(
         children: <Widget>[
           TextFormField(
-            decoration: InputDecoration(labelText: 'Email'),
+            key: const Key('email_field'),
+            decoration: const InputDecoration(labelText: 'Email'),
             validator: (value) {
               if (value!.isEmpty) {
-                return 'Gib deine email adresse ein';
+                return 'Gib deine Email-Adresse ein';
               }
               if (!EmailValidator.validate(value)) {
-                return 'Gib eine valide email adresse ein';
+                return 'Gib eine valide Email-Adresse ein';
               }
               return null;
             },
             onSaved: (value) => _email = value,
           ),
           TextFormField(
-            decoration: InputDecoration(labelText: 'Password'),
+            key: const Key('password_field'),
+            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             validator: (value) {
               if (value!.isEmpty) {
-                return 'Gib ein passwort ein';
+                return 'Gib ein Passwort ein';
               }
               return null;
             },
@@ -52,11 +75,10 @@ class _LoginFormState extends State<LoginForm> {
             height: 20,
           ),
           TextButton(
+            key: const Key('login_button'),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
-                print('email: $_email, password: $_password');
-                // Perform login here
                 login(context, _email, _password);
               }
             },
